@@ -7,6 +7,10 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import db_connections.querysPostgreSQL;
+import java.sql.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.swing.JOptionPane;
 
 public class index extends javax.swing.JFrame {
     
@@ -15,6 +19,7 @@ public class index extends javax.swing.JFrame {
 
     public index() {
         initComponents();
+        db = new DB_Connections();
     }
     
     public void testConnectionPostgreSQl(String host, String port, String DB, String user, String pwd) {
@@ -30,15 +35,53 @@ public class index extends javax.swing.JFrame {
     
     public void testConnection(String host, String port, String DB, String user, String pwd){
         db = new DB_Connections();
-        boolean test = db.testConnection(host, port, DB, user, pwd);
+        String test = db.testConnection(host, port, DB, user, pwd);
         
-        if(test){
+        if(test == null){
             JOptionPane.showMessageDialog(null,"Test Successfully","Connection Test Success",JOptionPane.INFORMATION_MESSAGE);
         }else{
             JOptionPane.showMessageDialog(null, "Connection Test Failed","Connection Error",JOptionPane.ERROR_MESSAGE);
         }
-        
     }
+    
+    public void executeConnection() {
+        String value = jComboBox1.getSelectedItem().toString();
+        host = txtHost.getText().toLowerCase();
+        port = txtPort.getText();
+        String bd = txtDB.getText();
+        user = txtUser.getText();
+        pwd = txtPwd.getText();
+        if(value.equals( "mysql")) {
+            String test = db.testConnection(host, port, bd, user, pwd);
+            url = "jdbc:mysql://"+host+":"+port+"/"+bd+"?useUnicode=true&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=UTC";
+            if(test == null){
+                MySQL_Command_Line form = new MySQL_Command_Line(url,pwd,user);
+                form.setLocationRelativeTo(null);
+                form.setResizable(false);
+                form.setVisible(true);
+            }
+            else {
+                  JOptionPane.showMessageDialog(null, "Connection Test Failed test","Connection Error",JOptionPane.ERROR_MESSAGE);
+                  System.out.println(test);
+                  
+             }
+        }
+        else {
+             url = "jdbc:postgresql://" + host + ":" + port + "/" + bd ;
+             boolean test = db.testConnectionPostgres(host, port, bd, user, pwd);
+             if(test){
+                
+                querysPostgreSQL form = new querysPostgreSQL(url,user,pwd);
+                form.setLocationRelativeTo(null);
+                form.setResizable(false);
+                form.setVisible(true);
+             }
+             else {
+                  JOptionPane.showMessageDialog(null, "Connection Test Failed","Connection Error",JOptionPane.ERROR_MESSAGE);
+             }
+        }
+    }
+   
     
     public void executeTestConnection() {
         String value = jComboBox1.getSelectedItem().toString();
@@ -47,27 +90,38 @@ public class index extends javax.swing.JFrame {
         String bd = txtDB.getText().toLowerCase();
         user = txtUser.getText();
         pwd = txtPwd.getText();
-        if(value.equals( "mysql")) {
-            testConnection(host,port,bd,user,pwd);
+        if(value.equals("mysql")) {
+            
+            String test = db.testConnection(host, port, bd, user, pwd);
+            if(test == null){
+                JOptionPane.showMessageDialog(null,"Test Successfully","Connection Test Success",JOptionPane.INFORMATION_MESSAGE);
+            }else{
+                JOptionPane.showMessageDialog(null, "Connection Test Failed","Connection Error",JOptionPane.ERROR_MESSAGE);
+            }
         }
+       
         else {
-            testConnectionPostgreSQl(host,port,bd,user,pwd);
+            boolean test = db.testConnectionPostgres(host, port, bd, user, pwd);
+            if(test){
+                JOptionPane.showMessageDialog(null,"Test Successfully","Connection Test Success",JOptionPane.INFORMATION_MESSAGE);
+            }else{
+                JOptionPane.showMessageDialog(null, "Connection Test Failed","Connection Error",JOptionPane.ERROR_MESSAGE);
+            }
         }
+        
     }
     
-    public void connectDB(String host, String port, String DB, String user, String pwd){
-        db = new DB_Connections();
-        boolean test = db.testConnection(host, port, DB, user, pwd);
-        
-        if(test){
-            JOptionPane.showMessageDialog(null,"Test Successfully","Connection Test Success",JOptionPane.INFORMATION_MESSAGE);
-            MySQL_Command_Line other = new MySQL_Command_Line();
-            
-            other.show();
-        }else{
-            JOptionPane.showMessageDialog(null, "Connection Test Failed","Connection Error",JOptionPane.ERROR_MESSAGE);
-        }
-    }
+//    public void connectDB(String host, String port, String DB, String user, String pwd){
+//        db = new DB_Connections();
+//        boolean test = db.testConnection(host, port, DB, user, pwd);
+//        
+//        if(test){
+//            JOptionPane.showMessageDialog(null,"Test Successfully","Connection Test Success",JOptionPane.INFORMATION_MESSAGE);
+//            
+//        }else{
+//            JOptionPane.showMessageDialog(null, "Connection Test Failed","Connection Error",JOptionPane.ERROR_MESSAGE);
+//        }
+//    }
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
@@ -127,6 +181,11 @@ public class index extends javax.swing.JFrame {
         btnTestC.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 btnTestCMouseClicked(evt);
+            }
+        });
+        btnTestC.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnTestCActionPerformed(evt);
             }
         });
 
@@ -236,28 +295,24 @@ public class index extends javax.swing.JFrame {
     }//GEN-LAST:event_btnTestCMouseClicked
 
     private void btnConnectMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_btnConnectMouseClicked
-        if(jComboBox1.getSelectedItem().toString().equals("mysql")) {
-            String host = txtHost.getText().toLowerCase();
-            String port = txtPort.getText();
-            String db = txtDB.getText().toLowerCase();
-            String user = txtUser.getText();
-            String pwd = txtPwd.getText();
-        
-            connectDB(host,port,db,user,pwd);
-        }
-        else {
-            executeTestConnection();
-            querysPostgreSQL window = new querysPostgreSQL(url,user,pwd);
-            window.setLocationRelativeTo(null); //Que cuando aparezca la ventana sea en el centro de la pantalla principal
-            window.setResizable(false); //Que no se pueda cambiar el tamaño
-            window.setVisible(true); //Que sea visible
-        }
-        
+//        if(jComboBox1.getSelectedItem().toString().equals("mysql")) {
+//            String host = txtHost.getText().toLowerCase();
+//            String port = txtPort.getText();
+//            String db = txtDB.getText().toLowerCase();
+//            String user = txtUser.getText();
+//            String pwd = txtPwd.getText();
+//        
+//        }
+    executeConnection();
     }//GEN-LAST:event_btnConnectMouseClicked
 
     private void jComboBox1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jComboBox1ActionPerformed
 
     }//GEN-LAST:event_jComboBox1ActionPerformed
+
+    private void btnTestCActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnTestCActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_btnTestCActionPerformed
 
     public static void main(String args[]) {
         /* Set the Nimbus look and feel */
