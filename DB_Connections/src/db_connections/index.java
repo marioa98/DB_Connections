@@ -3,14 +3,29 @@ package db_connections;
 
 import javax.swing.JOptionPane;
 import db_connections.DB_Connections;
-
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
+import db_connections.querysPostgreSQL;
 
 public class index extends javax.swing.JFrame {
     
     DB_Connections db;
+    String host,port,DB,user,pwd,url;
 
     public index() {
         initComponents();
+    }
+    
+    public void testConnectionPostgreSQl(String host, String port, String DB, String user, String pwd) {
+        Connection conn = null;
+        url = "jdbc:postgresql://" + host + ":" + port + "/" + DB ;
+        try {
+            conn = DriverManager.getConnection(url, user, pwd);
+            JOptionPane.showMessageDialog(null,"Test Successfully","Connection Test Success",JOptionPane.INFORMATION_MESSAGE);
+        } catch(SQLException e ) {
+            JOptionPane.showMessageDialog(null, "Connection Test Failed","Connection Error",JOptionPane.ERROR_MESSAGE);
+        }
     }
     
     public void testConnection(String host, String port, String DB, String user, String pwd){
@@ -23,6 +38,21 @@ public class index extends javax.swing.JFrame {
             JOptionPane.showMessageDialog(null, "Connection Test Failed","Connection Error",JOptionPane.ERROR_MESSAGE);
         }
         
+    }
+    
+    public void executeTestConnection() {
+        String value = jComboBox1.getSelectedItem().toString();
+        host = txtHost.getText().toLowerCase();
+        port = txtPort.getText();
+        String bd = txtDB.getText().toLowerCase();
+        user = txtUser.getText();
+        pwd = txtPwd.getText();
+        if(value.equals( "mysql")) {
+            testConnection(host,port,bd,user,pwd);
+        }
+        else {
+            testConnectionPostgreSQl(host,port,bd,user,pwd);
+        }
     }
     
     public void connectDB(String host, String port, String DB, String user, String pwd){
@@ -55,6 +85,8 @@ public class index extends javax.swing.JFrame {
         jLabel6 = new javax.swing.JLabel();
         btnTestC = new javax.swing.JButton();
         btnConnect = new javax.swing.JButton();
+        jLabel7 = new javax.swing.JLabel();
+        jComboBox1 = new javax.swing.JComboBox<>();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -105,6 +137,17 @@ public class index extends javax.swing.JFrame {
             }
         });
 
+        jLabel7.setFont(new java.awt.Font("Arial", 0, 12)); // NOI18N
+        jLabel7.setText("Data source:");
+
+        jComboBox1.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "mysql", "postgresql" }));
+        jComboBox1.setToolTipText("mysql");
+        jComboBox1.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jComboBox1ActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
@@ -141,8 +184,12 @@ public class index extends javax.swing.JFrame {
                                     .addComponent(txtPort, javax.swing.GroupLayout.PREFERRED_SIZE, 256, javax.swing.GroupLayout.PREFERRED_SIZE)))))
                     .addGroup(layout.createSequentialGroup()
                         .addGap(71, 71, 71)
-                        .addComponent(jLabel6)))
-                .addContainerGap(63, Short.MAX_VALUE))
+                        .addComponent(jLabel6))
+                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(jLabel7)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jComboBox1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addContainerGap(249, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -170,35 +217,47 @@ public class index extends javax.swing.JFrame {
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel5)
                     .addComponent(txtPwd, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(28, 28, 28)
+                .addGap(29, 29, 29)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jComboBox1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel7))
+                .addGap(41, 41, 41)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(btnTestC)
                     .addComponent(btnConnect))
-                .addContainerGap(47, Short.MAX_VALUE))
+                .addContainerGap(134, Short.MAX_VALUE))
         );
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
     private void btnTestCMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_btnTestCMouseClicked
-        String host = txtHost.getText().toLowerCase();
-        String port = txtPort.getText();
-        String db = txtDB.getText().toLowerCase();
-        String user = txtUser.getText();
-        String pwd = txtPwd.getText();
-        
-        testConnection(host,port,db,user,pwd);
+       executeTestConnection();
     }//GEN-LAST:event_btnTestCMouseClicked
 
     private void btnConnectMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_btnConnectMouseClicked
-        String host = txtHost.getText().toLowerCase();
-        String port = txtPort.getText();
-        String db = txtDB.getText().toLowerCase();
-        String user = txtUser.getText();
-        String pwd = txtPwd.getText();
+        if(jComboBox1.getSelectedItem().toString().equals("mysql")) {
+            String host = txtHost.getText().toLowerCase();
+            String port = txtPort.getText();
+            String db = txtDB.getText().toLowerCase();
+            String user = txtUser.getText();
+            String pwd = txtPwd.getText();
         
-        connectDB(host,port,db,user,pwd);
+            connectDB(host,port,db,user,pwd);
+        }
+        else {
+            executeTestConnection();
+            querysPostgreSQL window = new querysPostgreSQL(url,user,pwd);
+            window.setLocationRelativeTo(null); //Que cuando aparezca la ventana sea en el centro de la pantalla principal
+            window.setResizable(false); //Que no se pueda cambiar el tamaño
+            window.setVisible(true); //Que sea visible
+        }
+        
     }//GEN-LAST:event_btnConnectMouseClicked
+
+    private void jComboBox1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jComboBox1ActionPerformed
+
+    }//GEN-LAST:event_jComboBox1ActionPerformed
 
     public static void main(String args[]) {
         /* Set the Nimbus look and feel */
@@ -235,12 +294,14 @@ public class index extends javax.swing.JFrame {
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnConnect;
     private javax.swing.JButton btnTestC;
+    private javax.swing.JComboBox<String> jComboBox1;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
     private javax.swing.JLabel jLabel5;
     private javax.swing.JLabel jLabel6;
+    private javax.swing.JLabel jLabel7;
     private javax.swing.JTextField txtDB;
     private javax.swing.JTextField txtHost;
     private javax.swing.JTextField txtPort;
