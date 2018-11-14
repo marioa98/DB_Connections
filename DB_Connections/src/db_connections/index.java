@@ -55,7 +55,7 @@ public class index extends javax.swing.JFrame {
             String test = db.testConnection(host, port, bd, user, pwd);
             url = "jdbc:mysql://"+host+":"+port+"/"+bd+"?useUnicode=true&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=UTC";
             if(test == null){
-                MySQL_Command_Line form = new MySQL_Command_Line(url,pwd,user);
+                MySQL_Command_Line form = new MySQL_Command_Line(url,pwd,user, bd);
                 form.setLocationRelativeTo(null);
                 form.setResizable(false);
                 form.setVisible(true);
@@ -71,7 +71,7 @@ public class index extends javax.swing.JFrame {
              boolean test = db.testConnectionPostgres(host, port, bd, user, pwd);
              if(test){
                 
-                querysPostgreSQL form = new querysPostgreSQL(url,user,pwd);
+                querysPostgreSQL form = new querysPostgreSQL(url,user,pwd, bd);
                 form.setLocationRelativeTo(null);
                 form.setResizable(false);
                 form.setVisible(true);

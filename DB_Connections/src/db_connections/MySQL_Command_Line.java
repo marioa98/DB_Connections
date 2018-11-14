@@ -2,14 +2,27 @@
 package db_connections;
 import java.sql.*;
 import javax.swing.JOptionPane;
+import javax.swing.tree.DefaultMutableTreeNode;
+import javax.swing.tree.DefaultTreeModel;
 
 public class MySQL_Command_Line extends javax.swing.JFrame {
 String url,pwd,user;
-    public MySQL_Command_Line(String url, String pwd, String user) {
+    public MySQL_Command_Line(String url, String pwd, String user, String bd) {
         initComponents();
+        arbol(bd);
         this.url = url;
         this.pwd = pwd;
         this.user = user;
+    }
+    
+    public void arbol(String bd){
+        DefaultMutableTreeNode abuelo = new DefaultMutableTreeNode(bd);
+        DefaultTreeModel modelo = new DefaultTreeModel(abuelo);
+        jTree1.setModel(modelo);
+        DefaultMutableTreeNode tablas = new DefaultMutableTreeNode("tablas");
+        DefaultMutableTreeNode tabla2 = new DefaultMutableTreeNode("tabla2");
+        tablas.insert(tabla2, 0);
+        modelo.insertNodeInto(tablas, abuelo, 0);
     }
     
     public Connection connect() throws SQLException {
